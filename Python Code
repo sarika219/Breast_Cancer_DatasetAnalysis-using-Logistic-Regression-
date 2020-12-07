@@ -1,0 +1,102 @@
+#importing libraries and dataset
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+data = pd.read_csv('data_bc.csv')
+X = data.iloc[:,1:31]
+Y=data.iloc[:,31].values
+
+data.head()
+
+#dropping columns with null values
+data = data.dropna(axis = 1)
+
+#gives the shape of dataset
+print("Cancer data set dimensions : {}".format(data.shape))
+
+#number of Malignant and Benign 
+count = data['diagnosis'].value_counts()
+count
+
+data.isnull().sum()
+data.isna().sum()
+
+#Encoding categorical data values
+from sklearn.preprocessing import LabelEncoder
+labelencoder_Y = LabelEncoder()
+data.iloc[:,1] = labelencoder_Y.fit_transform(data.iloc[:,1].values)
+print(labelencoder_Y.fit_transform(data.iloc[:,1].values))
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.25, random_state = 0)
+
+#pair of independent variables with correlation greater than 0.5
+k = data.corr()
+z = [[str(i), str(j)] for i in k.columns for j in k.columns if (k.loc[i,j] > abs(0.5))&(i!=j)]
+z, len(z)
+
+X = data.iloc[:, 2:31].values
+Y = data.iloc[:,1].values
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.25, random_state=101)
+X_train.shape, X_test.shape, Y_train.shape, Y_test.shape
+
+#Scaling the dataset
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression(normalize = True)
+lr.fit(X_train, Y_train)
+
+lr.coef_
+predictions = lr.predict(X_test)
+lr.score(X_test, Y_test)
+
+#feature scaling
+from sklearn import preprocessing
+scale = preprocessing.StandardScaler()
+
+X_train = scale.fit_transform(X_train)
+X_train
+
+X_test = scale.fit_transform(X_test)
+X_test
+
+data['diagnosis_mean'] = data['diagnosis'].mean()
+data['diagnosis_mean'].head()
+
+plt.figure(dpi=70)
+k = range(0, len(data))
+plt.scatter(k, data['diagnosis'].sort_values(), color = 'red', label='Actual Diagnosis')
+plt.plot(k, data['diagnosis_mean'].sort_values(), color = 'green', label='Mean Diagnosis')
+plt.xlabel('Points')
+plt.ylabel('Diagnosis')
+plt.legend()
+
+#Feature Scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+from sklearn.linear_model import LogisticRegression
+classifier = LogisticRegression(random_state = 0)
+classifier.fit(X_train, Y_train)
+Y_pred = classifier.predict(X_test)
+"""
+from sklearn.metrics import precision_score
+Precision = precision_score(Y_test, Y_pred)
+from sklearn.metrics import recall_score
+Recall = recall_score(Y_test, Y_pred)
+#f1 = 2/((1/Precision)+(1/Recall))
+from sklearn.metrics import f1_score
+F1=f1_score(Y_test, Y_pred)  
+Precision,Recall, F1
+"""
+from sklearn.metrics import classification_report
+k = classification_report(Y_test, Y_pred)
+print(k)
+
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(Y_test, Y_pred)
+classifier.score(X_test, Y_test)
+
